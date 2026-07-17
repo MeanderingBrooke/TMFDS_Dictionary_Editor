@@ -350,7 +350,7 @@ class Window(tk.Frame):
         period,centerfreq = self.Get_Sig_Params()
         
         if fp != '':
-            signal.savesig(sig,fp,centerfreq,period,2205)
+            signal.savesig(sig,fp,centerfreq,period,11025)
             print(sig)
         
 
@@ -533,7 +533,8 @@ def Get_Font(root,fontname,fontsize=12):
         font=tkfont.Font(root=root,font=(fontname,fontsize))
         print(f"Using font {fontname}")
     else:
-        font=tkfont.nametofont('fixed')
+        font=tkfont.nametofont('TkFixedFont')
+
         print("Using default font")
     #root.option_add("*Font",font)
     return font
