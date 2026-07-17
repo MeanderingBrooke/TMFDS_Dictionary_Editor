@@ -1,12 +1,13 @@
 import tkinter as tk
 import tkinter.filedialog as filedialog
 import struct, math, time
-import numpy as np
 import TMFDS_Signal_Lib as signal
 from tkinter import ttk
 import tkinter.font as tkfont
-
-
+try:
+    import numpy as np
+except:
+    pass
         
 
 class Window(tk.Frame):
