@@ -14,7 +14,6 @@ root=tk.Tk()
 
 #get settings file
 try:
-    x=0/0
     file = open('Settings.txt')
     settings = eval(file.read())
     file.close()

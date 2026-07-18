@@ -48,8 +48,10 @@ class Window(tk.Frame):
         #set up dictionary 
         self.dictframe = tk.Frame(root)
         self.dictframe.pack(fill = tk.Y,side=tk.LEFT)
+
+        self.dictlist=tk.StringVar()
     
-        self.dictitems = tk.Listbox(self.dictframe,selectmode=tk.SINGLE)
+        self.dictitems = tk.Listbox(self.dictframe,selectmode=tk.SINGLE,listvariable=self.dictlist)
         self.dictitems.bind('<Double-1>', self.Edit_Dict_Entry)
         self.dictitems.pack(expand = True,fill = tk.Y)#,side=tk.LEFT)
         
@@ -76,6 +78,11 @@ class Window(tk.Frame):
         self.menu.add_cascade(label='Settings',menu=self.settings_menu)
         self.settings_menu.add_command(label='Set Dictionary',command=self.Change_Dict)
         self.settings_menu.add_command(label='Change Font',command=self.Edit_Font)
+        self.dict_menu=tk.Menu(self.menu)
+        self.menu.add_cascade(label='Dictionary',menu=self.dict_menu)
+        self.dict_menu.add_command(label='Add',command=self.Add_Dict_Entry)
+        self.dict_menu.add_command(label='Sort',command=self.Sort_Dict)
+        self.dict_menu.add_command(label='Refresh',command=self.Load_Dict)
 
 
 
@@ -108,15 +115,35 @@ class Window(tk.Frame):
                 done = False
                 fp = filedialog.askopenfilename(title="Open Dictionary Save")
 
+
+        self.Load_Dict()
+            
+    def Load_Dict(self):
+        self.dictlist.set('')
         words = self.dict['wordDict']
         item = ''
+        dictlist = []
         for i in range(len(words['keys'])):
             key = str(words['keys'][i])
             #print('x'*(5-len(key)))
             item = key + ' '*(5-len(key)) + words['values'][i]
-            self.dictitems.insert(tk.END,item)
-            
+            dictlist.append(item)
+        self.dictlist.set(dictlist)
+
+    def Sort_Dict(self):
         
+        words = self.dict['wordDict']
+        newkeys = words['keys'].copy()
+        newkeys.sort()
+        newkeys.reverse()
+        newvalues = []
+        for i in newkeys:
+            index = words['keys'].index(i)
+            newvalues.append(words['values'][index])
+        self.dict['wordDict']['keys']=newkeys.copy()
+        self.dict['wordDict']['values']=newvalues.copy()
+
+        self.Load_Dict()
 
     def Change_Dict(self):
         fp = ''
