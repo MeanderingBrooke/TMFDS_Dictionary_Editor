@@ -59,6 +59,7 @@ class Window(tk.Frame):
         self.editdictbtn.pack(fill=tk.X)
 
         tk.Button(self.dictframe,text="Add",command=self.Add_Dict_Entry).pack(fill=tk.X)
+        tk.Button(self.dictframe,text="Del",command=self.Del_Dict_Entry).pack(fill=tk.X)
     
 
         
@@ -78,6 +79,7 @@ class Window(tk.Frame):
         self.menu.add_cascade(label='Settings',menu=self.settings_menu)
         self.settings_menu.add_command(label='Set Dictionary',command=self.Change_Dict)
         self.settings_menu.add_command(label='Change Font',command=self.Edit_Font)
+        self.settings_menu.add_command(label='Default Format',command=self.Set_Global_Format)
         self.dict_menu=tk.Menu(self.menu)
         self.menu.add_cascade(label='Dictionary',menu=self.dict_menu)
         self.dict_menu.add_command(label='Add',command=self.Add_Dict_Entry)
@@ -160,30 +162,25 @@ class Window(tk.Frame):
                 print(fp,done)
         self.settings['dictfp'] = fp
 
-    def Edit_Dict_Entry(self,event=None): #unused is unused, makes event binding happy
+    def Confirm_Button(self,root):
+        btnframe = tk.Frame(root)
+        button_pressed = tk.BooleanVar(value=False)
+        tk.Button(btnframe,text="Ok",command = lambda: button_pressed.set(1)).pack(side=tk.LEFT)
+        tk.Button(btnframe,text="Cancel",command = lambda: button_pressed.set(0)).pack(side=tk.LEFT)
 
-        selected = self.dictitems.curselection()[0]
-        #print(selected)
-        editwindow = tk.Toplevel(self.root)
 
-        tk.Label(editwindow, text = "Changes Not Saved To Disk").grid(row=0,column=0,columnspan=2)
+        return btnframe,button_pressed
 
-        word = tk.StringVar(value=self.dict['wordDict']['values'][selected])
-
-        tk.Entry(editwindow,textvariable = word).grid(row=1,column=0,columnspan=2)
-        
-        beforeframe = tk.Frame(editwindow)
-        afterframe = tk.Frame(editwindow)
-        beforeframe.grid(row=2, column=0)
-        afterframe.grid(row=2, column=1)
-        
-        
-        formatting = self.dict['descDict']['values'][selected]
-        
+    def Formatting_Options(self,root,formatting,rowstart=2):
+        beforeframe = tk.Frame(root)
+        afterframe = tk.Frame(root)
+        beforeframe.grid(row=rowstart, column=0)
+        afterframe.grid(row=rowstart, column=1)
         
         before = tk.IntVar(value=formatting['formatMode']+1)
         after = tk.IntVar(value=formatting['formatModeAfter']+1)
         bkond = tk.BooleanVar(value=formatting['breakOnDouble'])
+        desc = tk.StringVar(value=formatting['desc'])
         
         tk.Label(beforeframe, text = "Before").pack(anchor=tk.W)
         tk.Radiobutton(beforeframe, text="None", variable=before, value=1).pack(anchor=tk.W)
@@ -197,15 +194,64 @@ class Window(tk.Frame):
         tk.Radiobutton(afterframe, text="New Line", variable=after, value=3).pack(anchor=tk.W)
         tk.Radiobutton(afterframe, text="2 New Line", variable=after, value=4).pack(anchor=tk.W)
 
-        tk.Checkbutton(editwindow, text="New Line on Double", variable=bkond).grid(row=3,column=0,columnspan=2)
+        tk.Checkbutton(root, text="New Line on Double", variable=bkond).grid(row=rowstart+1,column=0,columnspan=2)
 
+        tk.Entry(root,textvariable = desc).grid(row=rowstart+2,column=0,columnspan=2)
+
+        return before,after,bkond,desc
+
+    def Set_Global_Format(self,Event=None):
+        formatwindow= tk.Toplevel(self.root)
+        btnframe, button_pressed = self.Confirm_Button(formatwindow)
+
+        formatting = self.settings['defaultformat']
+
+        tk.Label(formatwindow,text="Set Default Format For New Words").grid(row=0,column=0)
+        before,after,bkond,desc = self.Formatting_Options(formatwindow,formatting,1)
+        btnframe.grid(row=4,column=0)
+
+        formatwindow.wait_variable(button_pressed)
+        formatwindow.destroy()
+        
+        
+        #print(button_pressed.get())
+        if button_pressed.get():
+            formatting['formatMode']=before.get()-1
+            formatting['formatModeAfter']=after.get()-1
+            formatting['breakOnDouble']=bkond.get()
+            formatting['desc']=desc.get()
+            self.settings['defaultformat']=formatting
+            
+
+        
+        
+
+    def Edit_Dict_Entry(self,event=None): #unused is unused, makes event binding happy
+
+        selected = self.dictitems.curselection()[0]
+        #print(selected)
+        editwindow = tk.Toplevel(self.root)
+
+        tk.Label(editwindow, text = "Changes Not Saved To Disk").grid(row=0,column=0,columnspan=2)
+
+        word = tk.StringVar(value=self.dict['wordDict']['values'][selected])
+
+        tk.Entry(editwindow,textvariable = word).grid(row=1,column=0,columnspan=2)
+        
+
+        
+        
+        formatting = self.dict['descDict']['values'][selected]
+
+
+        before,after,bkond,desc = self.Formatting_Options(editwindow,formatting,2)
         button_pressed = tk.BooleanVar(value=False)
         
         okbtn = tk.Button(editwindow,text='OK',command = lambda: button_pressed.set(1))
         cslbtn = tk.Button(editwindow,text='Cancel',command = lambda: button_pressed.set(0))
 
-        okbtn.grid(row=4, column=0)
-        cslbtn.grid(row=4, column=1)
+        okbtn.grid(row=5, column=0)
+        cslbtn.grid(row=5, column=1)
 
         
         
@@ -218,6 +264,7 @@ class Window(tk.Frame):
             formatting['formatMode']=before.get()-1
             formatting['formatModeAfter']=after.get()-1
             formatting['breakOnDouble']=bkond.get()
+            formatting['desc']=desc.get()
             self.dict['descDict']['values'][selected]=formatting
             self.dict['wordDict']['values'][selected]=word.get()
             key = str(self.dict['wordDict']['keys'][selected])
@@ -239,41 +286,16 @@ class Window(tk.Frame):
                 
         button_pressed = tk.BooleanVar(value=False)
         btnframe = tk.Frame(addwindow)
-        btnframe.grid(row=4, column=0)
+        btnframe.grid(row=5, column=0)
 
-        formatting = {'desc': 'none', 'formatMode': 0, 'formatModeAfter': 0, 'breakOnDouble': False}
+        formatting = self.settings['defaultformat']#= {'desc': 'none', 'formatMode': 0, 'formatModeAfter': 0, 'breakOnDouble': False}
 #-------------------------------------------------------------------------------
         word = tk.StringVar(value='')
 
         tk.Entry(addwindow,textvariable = word).grid(row=1,column=0,columnspan=2)
-        
-        beforeframe = tk.Frame(addwindow)
-        afterframe = tk.Frame(addwindow)
-        beforeframe.grid(row=2, column=0)
-        afterframe.grid(row=2, column=1)
-        
-        
-        #formatting = #self.dict['descDict']['values'][selected]
-        
-        
-        before = tk.IntVar(value=formatting['formatMode']+1)
-        after = tk.IntVar(value=formatting['formatModeAfter']+1)
-        bkond = tk.BooleanVar(value=formatting['breakOnDouble'])
-        
-        tk.Label(beforeframe, text = "Before").pack(anchor=tk.W)
-        tk.Radiobutton(beforeframe, text="None", variable=before, value=1).pack(anchor=tk.W)
-        tk.Radiobutton(beforeframe, text="Space", variable=before, value=2).pack(anchor=tk.W)
-        tk.Radiobutton(beforeframe, text="New Line", variable=before, value=3).pack(anchor=tk.W)
-        tk.Radiobutton(beforeframe, text="2 New Line", variable=before, value=4).pack(anchor=tk.W)
 
-        tk.Label(afterframe, text = "After").pack(anchor=tk.W)
-        tk.Radiobutton(afterframe, text="None", variable=after, value=1).pack(anchor=tk.W)
-        tk.Radiobutton(afterframe, text="Space", variable=after, value=2).pack(anchor=tk.W)
-        tk.Radiobutton(afterframe, text="New Line", variable=after, value=3).pack(anchor=tk.W)
-        tk.Radiobutton(afterframe, text="2 New Line", variable=after, value=4).pack(anchor=tk.W)
 
-        tk.Checkbutton(addwindow, text="New Line on Double", variable=bkond).grid(row=3,column=0,columnspan=2)
-
+        before,after,bkond,desc=self.Formatting_Options(addwindow,formatting,2)
 #-------------------------------------------------------------------------------
 
         
@@ -307,7 +329,7 @@ class Window(tk.Frame):
                     word.set(f"@{value}UNDEF")
                 self.dict['wordDict']['values'].append(word.get())
 
-                
+                formatting['desc']=desc.get()
                 formatting['formatMode']=before.get()-1
                 formatting['formatModeAfter']=after.get()-1
                 formatting['breakOnDouble']=bkond.get()
@@ -319,9 +341,25 @@ class Window(tk.Frame):
                 item = key + ' '*(5-len(key)) + word.get()
                 self.dictitems.insert(tk.END,item)
                 print("added to dict")
-
+                
         addwindow.destroy()
 
+    def Del_Dict_Entry(self):
+        selections = list(self.dictitems.curselection())
+        
+        selections.sort()
+        selections.reverse()
+        for selected in selections:
+            print(f"{self.dict['wordDict']['keys'][selected]}, {self.dict['wordDict']['values'][selected]}")
+        for selected in selections:
+            print(f"deleting {self.dict['wordDict']['keys'][selected]}, {self.dict['wordDict']['values'][selected]}")
+            del(self.dict['wordDict']['values'][selected])
+            del(self.dict['wordDict']['keys'][selected])
+            del(self.dict['descDict']['values'][selected])
+            del(self.dict['descDict']['keys'][selected])
+            self.dictitems.delete(selected)
+        #self.Load_Dict()
+        
         
     def Save_Dict(self):
         fp = self.settings['dictfp']
@@ -485,6 +523,8 @@ class Window(tk.Frame):
         else:
             self.unit1['values']=['Base 10']
             self.unit2['values']=['Base 8']
+        self.unit1.current(0)
+        self.unit2.current(0)
 
     def Calc_From(self):
         unit_type = self.unit_type.get()

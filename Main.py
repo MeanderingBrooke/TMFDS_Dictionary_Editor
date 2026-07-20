@@ -15,10 +15,13 @@ root=tk.Tk()
 #get settings file
 try:
     file = open('Settings.txt')
+    print("opened settings")
     settings = eval(file.read())
+    print(settings)
     file.close()
 except: #make settings if no file
-    settings = {'dictfp':'','defaultperiod':0.8066,'defaultcf':500,'font':'','fontsize':10}
+    print("no settings file")
+    settings = {'dictfp':'','defaultperiod':0.8066,'defaultcf':500,'font':'','fontsize':10,'defaultformat':{'desc': 'none', 'formatMode': 0, 'formatModeAfter': 0, 'breakOnDouble': False}}
 
 #get font
 fontname = settings['font']
@@ -47,5 +50,5 @@ while restart:
         font=gui.Get_Font(root,fontname)
         root.option_add("*Font",font)
     
-    
+
     
