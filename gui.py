@@ -51,7 +51,8 @@ class Window(tk.Frame):
 
         self.dictlist=tk.StringVar()
     
-        self.dictitems = tk.Listbox(self.dictframe,selectmode=tk.SINGLE,listvariable=self.dictlist)
+        self.dictitems = tk.Listbox(self.dictframe,listvariable=self.dictlist)
+        #selectmode=tk.SINGLE,
         self.dictitems.bind('<Double-1>', self.Edit_Dict_Entry)
         self.dictitems.pack(expand = True,fill = tk.Y)#,side=tk.LEFT)
         
@@ -59,7 +60,7 @@ class Window(tk.Frame):
         self.editdictbtn.pack(fill=tk.X)
 
         tk.Button(self.dictframe,text="Add",command=self.Add_Dict_Entry).pack(fill=tk.X)
-        tk.Button(self.dictframe,text="Del",command=self.Del_Dict_Entry).pack(fill=tk.X)
+        #tk.Button(self.dictframe,text="Del",command=self.Del_Dict_Entry).pack(fill=tk.X)
     
 
         
@@ -85,6 +86,7 @@ class Window(tk.Frame):
         self.dict_menu.add_command(label='Add',command=self.Add_Dict_Entry)
         self.dict_menu.add_command(label='Sort',command=self.Sort_Dict)
         self.dict_menu.add_command(label='Refresh',command=self.Load_Dict)
+        self.dict_menu.add_command(label='Delete',command=self.Del_Dict_Entry)
 
 
 
