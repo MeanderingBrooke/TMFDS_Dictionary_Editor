@@ -312,6 +312,36 @@ def convertunits(unit_type,from_unit,to_unit,value,units={}):
         units = UNITS[unit_type]
     result = value * units[from_unit]/units[to_unit]
     return result
+
+#small function i made for myself, might make more useful in the future
+def makeconfetti(n):
+    v=[]
+    for i in range(n):
+        x=random.randint(-8,8)
+        y=random.randint(-8,8)
+        z=random.randint(-8,8)
+        s=random.randint(1,16)/8
+        c=random.randint(0,48)
+        v.append((x,y,z,s,c))
+    vis='VISUAL('
+    for i in v:
+        a=str(i)
+        vis+="VERTEX"+a[1:-1]+','
+    vis = vis[0:-1] + ')'
+    vis = vis.replace('-','~')
+    return vis
+#need to add improve in the future, currently not very useful 
+def mkvis(x,y,z,s,c):
+    #v.append((x,y,z,a,c))
+    vis='VISUAL('
+    for i in range(len(x)):
+        #print(i,end=', ')
+        v=(float(x[i]),float(y[i]),float(z[i]),float(s[i]),int(c[i]))
+        a=str(v)
+        vis+="VERTEX"+a[1:-1]+','
+    vis = vis[0:-1] + ')'
+    vis = vis.replace('-','~')
+    return vis
 #------------------------------------------------------------------------------#
 #End Functions
 

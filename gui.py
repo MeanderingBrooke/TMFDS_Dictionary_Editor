@@ -227,9 +227,9 @@ class Window(tk.Frame):
             formatting['formatModeAfter']=after.get()-1
             formatting['breakOnDouble']=bkond.get()
             formatting['desc']=desc.get()
-            self.settings['defaultformat']=formatting
-            
-
+            self.settings['defaultformat']=formatting.copy()
+            print(formatting)
+            print(self.settings['defaultformat'])
         
         
 
@@ -274,6 +274,7 @@ class Window(tk.Frame):
             formatting['desc']=desc.get()
             self.dict['descDict']['values'][selected]=formatting
             self.dict['wordDict']['values'][selected]=word.get()
+            
             key = str(self.dict['wordDict']['keys'][selected])
             item = key + ' '*(max(5-len(key),1)) + word.get()
             self.dictitems.delete(selected)
@@ -295,17 +296,15 @@ class Window(tk.Frame):
         btnframe = tk.Frame(addwindow)
         btnframe.grid(row=5, column=0)
 
-        formatting = self.settings['defaultformat']#= {'desc': 'none', 'formatMode': 0, 'formatModeAfter': 0, 'breakOnDouble': False}
+        formatting = self.settings['defaultformat'].copy()  #stupid fucking pointers, without the .copy() it will set the formatting to the same dict as the default format, meaning changes here will change the original too
+                                                            #why the hell did they do that its just weird
 #-------------------------------------------------------------------------------
         word = tk.StringVar(value='')
 
         tk.Entry(addwindow,textvariable = word).grid(row=1,column=0,columnspan=2)
 
-
         before,after,bkond,desc=self.Formatting_Options(addwindow,formatting,2)
 #-------------------------------------------------------------------------------
-
-        
         tk.Button(btnframe,text="Ok",command = lambda: button_pressed.set(1)).pack(side=tk.LEFT)
         tk.Button(btnframe,text="Cancel",command = lambda: button_pressed.set(0)).pack(side=tk.LEFT)
 
