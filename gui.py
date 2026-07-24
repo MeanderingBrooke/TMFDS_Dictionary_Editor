@@ -408,10 +408,14 @@ class Window(tk.Frame):
             index=self.dict['wordDict']['keys'].index(key)
         elif value.upper() in self.dict['wordDict']['values']:
             index=self.dict['wordDict']['values'].index(value.upper())
-            
+        else:
+            for i in range(len(self.dict['wordDict']['values'])):
+                if value.upper() in self.dict['wordDict']['values'][i]:
+                    index=i
         if index > -1:
             self.dictitems.see(index)
             #self.dictitems.activate(index)
+            self.dictitems.selection_clear(0,tk.END)
             self.dictitems.select_set(index)
     
     def Open_Sig(self):
