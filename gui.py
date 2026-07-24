@@ -50,7 +50,12 @@ class Window(tk.Frame):
         self.dictframe.pack(fill = tk.Y,side=tk.LEFT)
 
         self.dictlist=tk.StringVar()
-    
+        self.searchdict=tk.StringVar()
+
+        search=tk.Entry(self.dictframe,textvariable=self.searchdict)
+        search.pack()
+        search.bind('<Return>', self.Search)
+        
         self.dictitems = tk.Listbox(self.dictframe,listvariable=self.dictlist)
         #selectmode=tk.SINGLE,
         self.dictitems.bind('<Double-1>', self.Edit_Dict_Entry)
@@ -130,7 +135,7 @@ class Window(tk.Frame):
         for i in range(len(words['keys'])):
             key = str(words['keys'][i])
             #print('x'*(5-len(key)))
-            item = key + ' '*(5-len(key)) + words['values'][i]
+            item = key + ' '*(max(5-len(key),1)) + words['values'][i]
             dictlist.append(item)
         self.dictlist.set(dictlist)
 
@@ -270,7 +275,7 @@ class Window(tk.Frame):
             self.dict['descDict']['values'][selected]=formatting
             self.dict['wordDict']['values'][selected]=word.get()
             key = str(self.dict['wordDict']['keys'][selected])
-            item = key + ' '*(5-len(key)) + word.get()
+            item = key + ' '*(max(5-len(key),1)) + word.get()
             self.dictitems.delete(selected)
             self.dictitems.insert(selected,item)
 
@@ -340,7 +345,7 @@ class Window(tk.Frame):
                 self.dict['descDict']['keys'].append(value)
  
                 key = str(value)
-                item = key + ' '*(5-len(key)) + word.get()
+                item = key + ' '*(max(5-len(key),1)) + word.get()
                 self.dictitems.insert(tk.END,item)
                 print("added to dict")
                 
@@ -392,7 +397,22 @@ class Window(tk.Frame):
             file.close()
             print(f"Saved dict to {fp}")
             
-        
+    def Search(self,Event=None):
+        value=self.searchdict.get()
+        isint=True
+        key=0
+        try: key=int(value)
+        except: isint=False
+        index=-1
+        if isint and key in self.dict['wordDict']['keys']:
+            index=self.dict['wordDict']['keys'].index(key)
+        elif value.upper() in self.dict['wordDict']['values']:
+            index=self.dict['wordDict']['values'].index(value.upper())
+            
+        if index > -1:
+            self.dictitems.see(index)
+            #self.dictitems.activate(index)
+            self.dictitems.select_set(index)
     
     def Open_Sig(self):
         fp=filedialog.askopenfilename(filetypes = [("WAV","*.wav")])
